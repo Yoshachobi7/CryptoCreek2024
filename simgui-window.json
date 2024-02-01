@@ -10,8 +10,8 @@
       "style": "1",
       "userScale": "2",
       "width": "1280",
-      "xpos": "466",
-      "ypos": "237"
+      "xpos": "218",
+      "ypos": "294"
     }
   },
   "Table": {
@@ -28,15 +28,20 @@
       "Pos": "60,60",
       "Size": "169,167"
     },
+    "###/SmartDashboard/Field": {
+      "Collapsed": "0",
+      "Pos": "493,220",
+      "Size": "750,381"
+    },
     "###FMS": {
       "Collapsed": "0",
       "Pos": "5,540",
-      "Size": "283,140"
+      "Size": "169,184"
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "248,461",
-      "Size": "796,73"
+      "Pos": "183,537",
+      "Size": "796,206"
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
