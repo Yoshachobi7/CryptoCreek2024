@@ -15,8 +15,7 @@ class MyRobot(wpilib.TimedRobot):
     def robotInit(self):
         """Robot-wide initialization code should go here"""
 
-        self.lstick = wpilib.Joystick(0)
-        self.rstick = wpilib.Joystick(1)
+        self.stick = wpilib.XboxController(0)
 
         self.lf_motor = wpilib.Jaguar(1)
         self.lr_motor = wpilib.Jaguar(2)
@@ -45,4 +44,4 @@ class MyRobot(wpilib.TimedRobot):
 
     def teleopPeriodic(self):
         """Called when operation control mode is enabled"""
-        self.drive.tankDrive(-self.lstick.getX(), -self.rstick.getX())
+        self.drive.tankDrive(-self.stick.getRightY(), self.stick.getLeftY())

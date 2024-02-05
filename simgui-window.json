@@ -10,8 +10,8 @@
       "style": "1",
       "userScale": "2",
       "width": "1280",
-      "xpos": "218",
-      "ypos": "294"
+      "xpos": "-164",
+      "ypos": "168"
     }
   },
   "Table": {
@@ -23,15 +23,10 @@
     }
   },
   "Window": {
-    "###/FMSInfo": {
-      "Collapsed": "0",
-      "Pos": "60,60",
-      "Size": "169,167"
-    },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
-      "Pos": "493,220",
-      "Size": "750,381"
+      "Pos": "271,45",
+      "Size": "750,425"
     },
     "###FMS": {
       "Collapsed": "0",
@@ -40,13 +35,8 @@
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "183,537",
-      "Size": "796,206"
-    },
-    "###Keyboard 0 Settings": {
-      "Collapsed": "0",
-      "Pos": "10,50",
-      "Size": "300,560"
+      "Pos": "247,437",
+      "Size": "796,240"
     },
     "###NetworkTables": {
       "Collapsed": "0",
@@ -61,17 +51,7 @@
     "###Other Devices": {
       "Collapsed": "0",
       "Pos": "1025,20",
-      "Size": "250,695"
-    },
-    "###Plot <0>": {
-      "Collapsed": "0",
-      "Pos": "60,65",
-      "Size": "700,395"
-    },
-    "###RoboRIO": {
-      "Collapsed": "0",
-      "Pos": "132,45",
-      "Size": "119,146"
+      "Size": "250,630"
     },
     "###System Joysticks": {
       "Collapsed": "0",

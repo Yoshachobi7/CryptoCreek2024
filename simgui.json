@@ -1,13 +1,4 @@
 {
-  "HALProvider": {
-    "Other Devices": {
-      "AnalogGyro[1]": {
-        "header": {
-          "open": true
-        }
-      }
-    }
-  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -27,38 +18,7 @@
       }
     }
   },
-  "NetworkTables": {
-    "Persistent Values": {
-      "open": false
-    },
-    "Retained Values": {
-      "open": false
-    },
-    "Transitory Values": {
-      "open": false
-    }
-  },
   "NetworkTables Info": {
     "visible": true
-  },
-  "Plot": {
-    "Plot <0>": {
-      "plots": [
-        {
-          "backgroundColor": [
-            0.05999999865889549,
-            0.05999999865889549,
-            0.05999999865889549,
-            0.9399999976158142
-          ],
-          "crosshairs": true,
-          "height": 333,
-          "legendLocation": 1
-        }
-      ],
-      "window": {
-        "visible": false
-      }
-    }
   }
 }

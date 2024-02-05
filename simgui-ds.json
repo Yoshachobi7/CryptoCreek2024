@@ -17,7 +17,7 @@
           "keyRate": 0.009999999776482582
         }
       ],
-      "axisCount": 5,
+      "axisCount": 3,
       "buttonCount": 4,
       "buttonKeys": [
         90,
@@ -90,9 +90,9 @@
     }
   ],
   "robotJoysticks": [
-    {},
     {
-      "guid": "030000006d04000016c2000000000000"
+      "guid": "78696e70757401000000000000000000",
+      "useGamepad": true
     }
   ]
 }
