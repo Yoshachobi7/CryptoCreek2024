@@ -12,15 +12,21 @@ import wpilib.drive
 class MyRobot(wpilib.TimedRobot):
     """Main robot class"""
 
+    kUpButton = 4 #Y Button
+    kLeftButton = 3 #X Button
+    kRightButton = 2 #B Button
+    kDownButton = 1 #A Button
+
     def robotInit(self):
         """Robot-wide initialization code should go here"""
 
         self.stick = wpilib.XboxController(0)
 
-        self.lf_motor = wpilib.Jaguar(1)
-        self.lr_motor = wpilib.Jaguar(2)
-        self.rf_motor = wpilib.Jaguar(3)
-        self.rr_motor = wpilib.Jaguar(4)
+        self.lf_motor = wpilib.PWMSparkMax(1)
+        self.lr_motor = wpilib.PWMSparkMax(2)
+        self.rf_motor = wpilib.PWMSparkMax(3)
+        self.rr_motor = wpilib.PWMSparkMax(4)
+        self.hook_motor = wpilib.PWMSparkMax(5)
 
         l_motor = wpilib.MotorControllerGroup(self.lf_motor, self.lr_motor)
         r_motor = wpilib.MotorControllerGroup(self.rf_motor, self.rr_motor)
@@ -44,4 +50,35 @@ class MyRobot(wpilib.TimedRobot):
 
     def teleopPeriodic(self):
         """Called when operation control mode is enabled"""
-        self.drive.tankDrive(-self.stick.getRightY(), self.stick.getLeftY())
+        #drive motors
+        RightY = self.stick.getRightY()
+        LeftY = self.stick.getLeftY()
+
+        if(RightY < 0):
+            rightynegative = True
+        RightYEXP = ((RightY) ** 2)
+        if (rightynegative == 'True'):
+            RightYEXP = -RightYEXP
+
+        if(LeftY < 0):
+            leftynegative = True
+            bool(leftynegative)
+        LeftYEXP = ((LeftY) ** 2)
+        if (leftynegative == True):
+            LeftYEXP = -LeftYEXP
+
+        self.drive.tankDrive(-RightYEXP, LeftYEXP)
+
+        #hook motor
+        hookup = self.stick.getRawButton(self.kUpButton)
+        hookdown = self.stick.getRawButton(self.kDownButton)
+        hookmotor = 0
+        if(hookup == True):
+            hookmotor = 1
+        elif(hookdown == True):
+            hookmotor = -1
+        else:
+            hookmotor = 0
+        self.hook_motor.set(hookmotor)
+
+        print(self.hook_motor.get())
