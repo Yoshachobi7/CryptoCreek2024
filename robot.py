@@ -57,19 +57,23 @@ class MyRobot(wpilib.TimedRobot):
         RightY = self.stick.getRightY()
         LeftY = self.stick.getLeftY()
 
+        #exponential movement
         if(RightY < 0):
-            RightY = (RightY**2)*-1
+            RightY = (RightY**4)*-1
         else:
-            RightY = (RightY**2)
+            RightY = (RightY**4)
         
-
         if(LeftY < 0):
-            LeftY = (LeftY**2)*-1
+            LeftY = (LeftY**4)*-1
         else:
-            LeftY = (LeftY**2)
+            LeftY = (LeftY**4)
 
-        print(RightY, LeftY)
-
+        #this makes it turn slower
+        if((RightY < 0.1 and RightY > -0.1) and (LeftY > 0.5 or LeftY < -0.5)):
+            LeftY = LeftY * 0.66
+        elif((LeftY < 0.1 and LeftY > -0.1) and (RightY > 0.5 or RightY < -0.5)):
+            RightY = RightY * 0.66
+        
         self.drive.tankDrive(RightY, LeftY)
 
         #hook motor
