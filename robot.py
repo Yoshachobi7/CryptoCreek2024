@@ -26,10 +26,13 @@ class MyRobot(wpilib.TimedRobot):
         self.lr_motor = wpilib.PWMSparkMax(2)
         self.rf_motor = wpilib.PWMSparkMax(3)
         self.rr_motor = wpilib.PWMSparkMax(4)
+
         self.hook_motor = wpilib.PWMSparkMax(5)
 
         l_motor = wpilib.MotorControllerGroup(self.lf_motor, self.lr_motor)
         r_motor = wpilib.MotorControllerGroup(self.rf_motor, self.rr_motor)
+
+        l_motor.setInverted(True)
 
         self.drive = wpilib.drive.DifferentialDrive(l_motor, r_motor)
 
@@ -55,19 +58,19 @@ class MyRobot(wpilib.TimedRobot):
         LeftY = self.stick.getLeftY()
 
         if(RightY < 0):
-            rightynegative = True
-        RightYEXP = ((RightY) ** 2)
-        if (rightynegative == 'True'):
-            RightYEXP = -RightYEXP
+            RightY = (RightY**2)*-1
+        else:
+            RightY = (RightY**2)
+        
 
         if(LeftY < 0):
-            leftynegative = True
-            bool(leftynegative)
-        LeftYEXP = ((LeftY) ** 2)
-        if (leftynegative == True):
-            LeftYEXP = -LeftYEXP
+            LeftY = (LeftY**2)*-1
+        else:
+            LeftY = (LeftY**2)
 
-        self.drive.tankDrive(-RightYEXP, LeftYEXP)
+        print(RightY, LeftY)
+
+        self.drive.tankDrive(RightY, LeftY)
 
         #hook motor
         hookup = self.stick.getRawButton(self.kUpButton)
@@ -81,4 +84,3 @@ class MyRobot(wpilib.TimedRobot):
             hookmotor = 0
         self.hook_motor.set(hookmotor)
 
-        print(self.hook_motor.get())
