@@ -7,6 +7,8 @@
 
 import wpilib
 import wpilib.drive
+import math
+import wpimath.controller
 
 
 class MyRobot(wpilib.TimedRobot):
@@ -16,6 +18,24 @@ class MyRobot(wpilib.TimedRobot):
     kLeftButton = 3 #X Button
     kRightButton = 2 #B Button
     kDownButton = 1 #A Button
+
+    #idk if we need all this
+    kMotorPort = 0
+    kEncoderAChannel = 0
+    kEncoderBChannel = 1
+    kJoystickPort = 0
+
+    kElevatorKp = 5.0
+    kElevatorGearing = 10.0
+    kElevatorDrumRadius = 0.0508  # 2 inches in meters
+    kCarriageMass = 4
+
+    kMinElevatorHeight = 0.0508  # 2 inches
+    kMaxElevatorHeight = 1.27  # 50 inches
+
+    # distance per pulse = (distance per revolution) / (pulses per revolution)
+    #  = (Pi * D) / ppr
+    kElevatorEncoderDistPerPulse = 2.0 * math.pi * kElevatorDrumRadius / 4096.0
 
     def robotInit(self):
         """Robot-wide initialization code should go here"""
@@ -38,6 +58,14 @@ class MyRobot(wpilib.TimedRobot):
 
         # Position gets automatically updated as robot moves
         self.gyro = wpilib.AnalogGyro(1)
+
+        # standard classes for controlling our elevator
+        self.controller = wpimath.controller.PIDController(self.kElevatorKp, 0, 0)
+        self.encoder = wpilib.Encoder(self.kEncoderAChannel, self.kEncoderBChannel)
+        self.motor = wpilib.PWMSparkMax(self.kMotorPort)
+        self.joystick = wpilib.Joystick(self.kJoystickPort)
+
+        self.encoder.setDistancePerPulse(self.kElevatorEncoderDistPerPulse)
 
     def autonomousInit(self):
         """Called when autonomous mode is enabled"""
@@ -77,6 +105,7 @@ class MyRobot(wpilib.TimedRobot):
         self.drive.tankDrive(RightY, LeftY)
 
         #hook motor
+        '''
         hookup = self.stick.getRawButton(self.kUpButton)
         hookdown = self.stick.getRawButton(self.kDownButton)
         hookmotor = 0
@@ -86,5 +115,19 @@ class MyRobot(wpilib.TimedRobot):
             hookmotor = -1
         else:
             hookmotor = 0
-        self.hook_motor.set(hookmotor)
+        self.hook_motor.set(hookmotor) 
+        '''
+
+        #hook motor except it might work this time
+        if self.joystick.getTrigger():
+            # Here, we run PID control like normal, with a constant setpoint of 30in (0.762 meters).
+            pidOutput = self.controller.calculate(self.encoder.getDistance(), 0.762)
+            self.motor.setVoltage(pidOutput)
+        else:
+            # Otherwise we disable the motor
+            self.motor.set(0.0)
+
+    def disabledInit(self) -> None:
+        # This just makes sure that our simulation code knows that the motor is off
+        self.motor.set(0)
 
