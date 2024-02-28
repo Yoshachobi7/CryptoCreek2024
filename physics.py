@@ -7,9 +7,8 @@
 #
 # See the notes for the other physics sample
 #
-import wpilib
+
 import wpilib.simulation
-import wpimath.system.plant
 
 from pyfrc.physics.core import PhysicsInterface
 from pyfrc.physics import motor_cfgs, tankmodel
@@ -37,9 +36,10 @@ class PhysicsEngine:
 
         # Motors
         self.lf_motor = wpilib.simulation.PWMSim(robot.lf_motor.getChannel())
-        # self.lr_motor = wpilib.simulation.PWMSim(2)
+        # self.lr_motor = wpilib.simulation.PWMSim(robot.lr_motor.getChannel())
+
         self.rf_motor = wpilib.simulation.PWMSim(robot.rf_motor.getChannel())
-        # self.rr_motor = wpilib.simulation.PWMSim(4)
+        # self.rr_motor = wpilib.simulation.PWMSim(robot.rr_motor.getChannel())
 
         # Gyro
         self.gyro = wpilib.simulation.AnalogGyroSim(robot.gyro)
@@ -59,34 +59,6 @@ class PhysicsEngine:
             6 * units.inch,                     # wheel diameter
         )
         # fmt: on
-
-        # This gearbox represents a gearbox containing 4 Vex 775pro motors.
-        self.elevatorGearbox = wpimath.system.plant.DCMotor.vex775Pro(4)
-
-        # Simulation classes help us simulate what's going on, including gravity.
-        self.elevatorSim = wpilib.simulation.ElevatorSim(
-            self.elevatorGearbox,
-            robot.kElevatorGearing,
-            robot.kCarriageMass,
-            robot.kElevatorDrumRadius,
-            robot.kMinElevatorHeight,
-            robot.kMaxElevatorHeight,
-            True,
-            0,
-            [0.01],
-        )
-        self.encoderSim = wpilib.simulation.EncoderSim(robot.encoder)
-        self.motorSim = wpilib.simulation.PWMSim(robot.motor.getChannel())
-
-        # Create a Mechanism2d display of an elevator
-        self.mech2d = wpilib.Mechanism2d(20, 50)
-        self.elevatorRoot = self.mech2d.getRoot("Elevator Root", 10, 0)
-        self.elevatorMech2d = self.elevatorRoot.appendLigament(
-            "Elevator", self.elevatorSim.getPositionInches(), 90
-        )
-
-        # Put Mechanism to SmartDashboard
-        wpilib.SmartDashboard.putData("Elevator Sim", self.mech2d)
 
     def update_sim(self, now: float, tm_diff: float) -> None:
         """
@@ -109,22 +81,3 @@ class PhysicsEngine:
         # -> FRC gyros are positive clockwise, but the returned pose is positive
         #    counter-clockwise
         self.gyro.setAngle(-pose.rotation().degrees())
-
-        # First, we set our "inputs" (voltages)
-        self.elevatorSim.setInput(
-            0, self.motorSim.getSpeed() * wpilib.RobotController.getInputVoltage()
-        )
-
-        # Next, we update it
-        self.elevatorSim.update(tm_diff)
-
-        # Finally, we set our simulated encoder's readings and simulated battery
-        # voltage
-        self.encoderSim.setDistance(self.elevatorSim.getPosition())
-        # SimBattery estimates loaded battery voltage
-        # wpilib.simulation.RoboRioSim.setVInVoltage(
-        #     wpilib.simulation.BatterySim
-        # )
-
-        # Update the Elevator length based on the simulated elevator height
-        self.elevatorMech2d.setLength(self.elevatorSim.getPositionInches())

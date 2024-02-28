@@ -5,49 +5,31 @@
 # the WPILib BSD license file in the root directory of this project.
 #
 
+import rev
 import wpilib
 import wpilib.drive
-import math
-import wpimath.controller
 
+kY = 4 #Y Button
+kX = 3 #X Button
+kB = 2 #B Button
+kA = 1 #A Button
+kLB = 5 #LB Button
+kRB = 6 #RB Button
+kBack = 7 #Back Button
+kStart = 8 #Start Button
 
 class MyRobot(wpilib.TimedRobot):
     """Main robot class"""
 
-    kUpButton = 4 #Y Button
-    kLeftButton = 3 #X Button
-    kRightButton = 2 #B Button
-    kDownButton = 1 #A Button
-
-    #idk if we need all this
-    kMotorPort = 0
-    kEncoderAChannel = 0
-    kEncoderBChannel = 1
-    kJoystickPort = 0
-
-    kElevatorKp = 5.0
-    kElevatorGearing = 10.0
-    kElevatorDrumRadius = 0.0508  # 2 inches in meters
-    kCarriageMass = 4
-
-    kMinElevatorHeight = 0.0508  # 2 inches
-    kMaxElevatorHeight = 1.27  # 50 inches
-
-    # distance per pulse = (distance per revolution) / (pulses per revolution)
-    #  = (Pi * D) / ppr
-    kElevatorEncoderDistPerPulse = 2.0 * math.pi * kElevatorDrumRadius / 4096.0
-
     def robotInit(self):
         """Robot-wide initialization code should go here"""
 
-        self.stick = wpilib.XboxController(0)
+        self.joystick = wpilib.XboxController(0)
 
-        self.lf_motor = wpilib.PWMSparkMax(1)
-        self.lr_motor = wpilib.PWMSparkMax(2)
-        self.rf_motor = wpilib.PWMSparkMax(3)
-        self.rr_motor = wpilib.PWMSparkMax(4)
-
-        self.hook_motor = wpilib.PWMSparkMax(5)
+        self.lf_motor = rev.CANSparkMax(2, rev.CANSparkLowLevel.MotorType.kBrushed)
+        self.lr_motor = rev.CANSparkMax(9, rev.CANSparkLowLevel.MotorType.kBrushed)
+        self.rf_motor = rev.CANSparkMax(3, rev.CANSparkLowLevel.MotorType.kBrushed)
+        self.rr_motor = rev.CANSparkMax(4, rev.CANSparkLowLevel.MotorType.kBrushed)
 
         l_motor = wpilib.MotorControllerGroup(self.lf_motor, self.lr_motor)
         r_motor = wpilib.MotorControllerGroup(self.rf_motor, self.rr_motor)
@@ -56,16 +38,15 @@ class MyRobot(wpilib.TimedRobot):
 
         self.drive = wpilib.drive.DifferentialDrive(l_motor, r_motor)
 
+        # change to rev.cansparkmax
+        # self.launch_motor = wpilib.PWMSparkMax(5)
+        # self.feed_motor = wpilib.PWMSparkMax(6)
+
+        # self.climber_motor = wpilib.PWMSparkMax(7)
+        # self.claw_motor = wpilib.PWMSparkMax(8)
+
         # Position gets automatically updated as robot moves
         self.gyro = wpilib.AnalogGyro(1)
-
-        # standard classes for controlling our elevator
-        self.controller = wpimath.controller.PIDController(self.kElevatorKp, 0, 0)
-        self.encoder = wpilib.Encoder(self.kEncoderAChannel, self.kEncoderBChannel)
-        self.motor = wpilib.PWMSparkMax(self.kMotorPort)
-        self.joystick = wpilib.Joystick(self.kJoystickPort)
-
-        self.encoder.setDistancePerPulse(self.kElevatorEncoderDistPerPulse)
 
     def autonomousInit(self):
         """Called when autonomous mode is enabled"""
@@ -74,60 +55,74 @@ class MyRobot(wpilib.TimedRobot):
         self.timer.start()
 
     def autonomousPeriodic(self):
-        if self.timer.get() < 2.0:
-            self.drive.arcadeDrive(-1.0, -0.3)
-        else:
-            self.drive.arcadeDrive(0, 0)
+        """auto"""
 
     def teleopPeriodic(self):
         """Called when operation control mode is enabled"""
         #drive motors
-        RightY = self.stick.getRightY()
-        LeftY = self.stick.getLeftY()
+        RightY = self.joystick.getRightY()
+        LeftY = self.joystick.getLeftY()
 
-        #exponential movement
-        if(RightY < 0):
-            RightY = (RightY**4)*-1
-        else:
-            RightY = (RightY**4)
+        # # exponential movement
+        # if(RightY < 0):
+        #     RightY = (RightY**4)*-1
+        # else:
+        #     RightY = (RightY**4)
         
-        if(LeftY < 0):
-            LeftY = (LeftY**4)*-1
-        else:
-            LeftY = (LeftY**4)
+        # if(LeftY < 0):
+        #     LeftY = (LeftY**4)*-1
+        # else:
+        #     LeftY = (LeftY**4)
 
-        #this makes it turn slower
-        if((RightY < 0.1 and RightY > -0.1) and (LeftY > 0.5 or LeftY < -0.5)):
-            LeftY = LeftY * 0.66
-        elif((LeftY < 0.1 and LeftY > -0.1) and (RightY > 0.5 or RightY < -0.5)):
-            RightY = RightY * 0.66
-        
+        # # this makes it turn slower
+        # if((RightY < 0.1 and RightY > -0.1) and (LeftY > 0.5 or LeftY < -0.5)):
+        #     LeftY = LeftY * 0.66
+        # elif((LeftY < 0.1 and LeftY > -0.1) and (RightY > 0.5 or RightY < -0.5)):
+        #     RightY = RightY * 0.66
+
+
         self.drive.tankDrive(RightY, LeftY)
 
-        #hook motor
-        '''
-        hookup = self.stick.getRawButton(self.kUpButton)
-        hookdown = self.stick.getRawButton(self.kDownButton)
-        hookmotor = 0
-        if(hookup == True):
-            hookmotor = 1
-        elif(hookdown == True):
-            hookmotor = -1
-        else:
-            hookmotor = 0
-        self.hook_motor.set(hookmotor) 
-        '''
+        # # launcher wheel
+        # if (self.joystick.getRawButton(kRB)):
+        #     self.launch_motor.set(1)
+        # elif (self.joystick.getRawButtonReleased(kRB)):
+        #     self.launch_motor.set(0)
 
-        #hook motor except it might work this time
-        if self.joystick.getTrigger():
-            # Here, we run PID control like normal, with a constant setpoint of 30in (0.762 meters).
-            pidOutput = self.controller.calculate(self.encoder.getDistance(), 0.762)
-            self.motor.setVoltage(pidOutput)
-        else:
-            # Otherwise we disable the motor
-            self.motor.set(0.0)
+        # # feeder wheel
+        # if (self.joystick.getRawButton(kLB)):
+        #     self.feed_motor.set(1)
+        # elif (self.joystick.getRawButtonReleased(kLB)):
+        #     self.feed_motor.set(0)
 
-    def disabledInit(self) -> None:
-        # This just makes sure that our simulation code knows that the motor is off
-        self.motor.set(0)
+        # # intake note
+        # if (self.joystick.getRawButton(kY)):
+        #     self.launch_motor.set(-1)
+        #     self.feed_motor.set(1)
+        # elif (self.joystick.getRawButtonReleased(kY)):
+        #     self.launch_motor.set(0)
+        #     self.feed_motor.set(0)
 
+        # # amp button?
+        # if (self.joystick.getRawButton(kX)):
+        #     self.launch_motor.set(.4)
+        #     self.feed_motor.set(.17)
+        # elif (self.joystick.getRawButtonReleased(kX)):
+        #     self.launch_motor.set(0)
+        #     self.feed_motor.set(0)
+
+        # # claw
+        # if (self.joystick.getRawButton(kA)):
+        #     self.claw_motor.set(.5)
+        # elif (self.joystick.getRawButton(kB)):
+        #     self.claw_motor.set(-.5)
+        # else:
+        #     self.claw_motor.set(0)
+
+        # # hook motor
+        # if (self.joystick.getPOV() == 0):
+        #     self.climber_motor.set(1)
+        # elif (self.joystick.getPOV() == 180):
+        #     self.climber_motor.set(-1)
+        # else:
+        #     self.climber_motor.set(0)
