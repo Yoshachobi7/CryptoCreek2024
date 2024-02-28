@@ -39,11 +39,29 @@ class MyRobot(wpilib.TimedRobot):
         self.drive = wpilib.drive.DifferentialDrive(l_motor, r_motor)
 
         # change to rev.cansparkmax
-        # self.launch_motor = wpilib.PWMSparkMax(5)
-        # self.feed_motor = wpilib.PWMSparkMax(6)
+        self.climber_motor = rev.CANSparkMax(7, rev.CANSparkLowLevel.MotorType.kBrushless)
+        self.claw_motor = rev.CANSparkMax(8, rev.CANSparkLowLevel.MotorType.kBrushless)
+        self.feed_motor = rev.CANSparkMax(5, rev.CANSparkLowLevel.MotorType.kBrushed) #bottom motor
+        self.launch_motor = rev.CANSparkMax(6, rev.CANSparkLowLevel.MotorType.kBrushed) #top motor
 
-        # self.climber_motor = wpilib.PWMSparkMax(7)
-        # self.claw_motor = wpilib.PWMSparkMax(8)
+        # If launch and feeder wheels are spinning wrong direction
+        self.feed_motor.setInverted(True)
+        self.launch_motor.setInverted(True)
+
+        # Apply current to launching mechanism
+        self.feed_motor.setSmartCurrentLimit(60)
+        self.launch_motor.setSmartCurrentLimit(60)
+
+        # Inverting and applying current limit to roller claw and climber
+        self.claw_motor.setInverted(False)
+        self.climber_motor.setInverted(False)
+
+        self.claw_motor.setSmartCurrentLimit(60)
+        self.climber_motor.setSmartCurrentLimit(60)
+
+        # Brake mode best for these motors and their use
+        self.claw_motor.setIdleMode(1)      # kBrake
+        self.climber_motor.setIdleMode(1)   # kBrake
 
         # Position gets automatically updated as robot moves
         self.gyro = wpilib.AnalogGyro(1)
@@ -62,6 +80,8 @@ class MyRobot(wpilib.TimedRobot):
         #drive motors
         RightY = self.joystick.getRightY()
         LeftY = self.joystick.getLeftY()
+
+        # test code for changing how movement works:
 
         # # exponential movement
         # if(RightY < 0):
@@ -83,46 +103,54 @@ class MyRobot(wpilib.TimedRobot):
 
         self.drive.tankDrive(RightY, LeftY)
 
-        # # launcher wheel
-        # if (self.joystick.getRawButton(kRB)):
-        #     self.launch_motor.set(1)
-        # elif (self.joystick.getRawButtonReleased(kRB)):
-        #     self.launch_motor.set(0)
+        # LAUNCHER WHEEL CONTROL
+        # Spins up the launcher wheel
+        if (self.joystick.getRawButton(kRB)):
+            self.launch_motor.set(1)
+        elif (self.joystick.getRawButtonReleased(kRB)):
+            self.launch_motor.set(0)
 
-        # # feeder wheel
-        # if (self.joystick.getRawButton(kLB)):
-        #     self.feed_motor.set(1)
-        # elif (self.joystick.getRawButtonReleased(kLB)):
-        #     self.feed_motor.set(0)
+        # FEEDER WHEEL CONTROL
+        # Spins feeder wheel, wait for launch wheel to spin up to full speed for best results
+        if (self.joystick.getRawButton(kLB)):
+            self.feed_motor.set(1)
+        elif (self.joystick.getRawButtonReleased(kLB)):
+            self.feed_motor.set(0)
 
-        # # intake note
-        # if (self.joystick.getRawButton(kY)):
-        #     self.launch_motor.set(-1)
-        #     self.feed_motor.set(1)
-        # elif (self.joystick.getRawButtonReleased(kY)):
-        #     self.launch_motor.set(0)
-        #     self.feed_motor.set(0)
+        # INTAKE NOTE
+        # While the button is being held spin both motors to intake note
+        if (self.joystick.getRawButton(kY)):
+            self.launch_motor.set(-1)
+            self.feed_motor.set(1)
+        elif (self.joystick.getRawButtonReleased(kY)):
+            self.launch_motor.set(0)
+            self.feed_motor.set(0)
 
-        # # amp button?
-        # if (self.joystick.getRawButton(kX)):
-        #     self.launch_motor.set(.4)
-        #     self.feed_motor.set(.17)
-        # elif (self.joystick.getRawButtonReleased(kX)):
-        #     self.launch_motor.set(0)
-        #     self.feed_motor.set(0)
+        # amp button?
+        # While amp button is being held, spin both motors to "spit" the note
+        # out at a lower speed into the amp
+        if (self.joystick.getRawButton(kX)):
+            self.launch_motor.set(.4)
+            self.feed_motor.set(.17)
+        elif (self.joystick.getRawButtonReleased(kX)):
+            self.launch_motor.set(0)
+            self.feed_motor.set(0)
 
-        # # claw
-        # if (self.joystick.getRawButton(kA)):
-        #     self.claw_motor.set(.5)
-        # elif (self.joystick.getRawButton(kB)):
-        #     self.claw_motor.set(-.5)
-        # else:
-        #     self.claw_motor.set(0)
+        # ROLLER CLAW CONTROL
+        # Hold one of the two buttons to injest or expel note from roller claw
+        # One button is positive claw power the other negative
+        if (self.joystick.getRawButton(kA)):
+            self.claw_motor.set(.5)
+        elif (self.joystick.getRawButton(kB)):
+            self.claw_motor.set(-.5)
+        else:
+            self.claw_motor.set(0)
 
-        # # hook motor
-        # if (self.joystick.getPOV() == 0):
-        #     self.climber_motor.set(1)
-        # elif (self.joystick.getPOV() == 180):
-        #     self.climber_motor.set(-1)
-        # else:
-        #     self.climber_motor.set(0)
+        # HOOK MOTOR CONTROL
+        # POV is D-Pad on controller, 0 == UP   180 == DOWN
+        if (self.joystick.getPOV() == 0):
+            self.climber_motor.set(1)
+        elif (self.joystick.getPOV() == 180):
+            self.climber_motor.set(-1)
+        else:
+            self.climber_motor.set(0)
