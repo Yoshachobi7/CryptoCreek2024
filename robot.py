@@ -38,11 +38,10 @@ class MyRobot(wpilib.TimedRobot):
 
         self.drive = wpilib.drive.DifferentialDrive(l_motor, r_motor)
 
-        # change to rev.cansparkmax
         self.climber_motor = rev.CANSparkMax(7, rev.CANSparkLowLevel.MotorType.kBrushless)
         self.claw_motor = rev.CANSparkMax(8, rev.CANSparkLowLevel.MotorType.kBrushless)
-        self.feed_motor = rev.CANSparkMax(5, rev.CANSparkLowLevel.MotorType.kBrushed) #bottom motor
-        self.launch_motor = rev.CANSparkMax(6, rev.CANSparkLowLevel.MotorType.kBrushed) #top motor
+        self.feed_motor = rev.CANSparkMax(5, rev.CANSparkLowLevel.MotorType.kBrushed) #bottom wheel
+        self.launch_motor = rev.CANSparkMax(6, rev.CANSparkLowLevel.MotorType.kBrushed) #top wheel
 
         # If launch and feeder wheels are spinning wrong direction
         self.feed_motor.setInverted(True)
@@ -66,6 +65,7 @@ class MyRobot(wpilib.TimedRobot):
         # Position gets automatically updated as robot moves
         self.gyro = wpilib.AnalogGyro(1)
 
+
     def autonomousInit(self):
         """Called when autonomous mode is enabled"""
 
@@ -73,35 +73,39 @@ class MyRobot(wpilib.TimedRobot):
         self.timer.start()
 
     def autonomousPeriodic(self):
-        """auto"""
+        """Movement during autonomous mode"""
+        #if self.timer.get() < 1.0:
+        #    self.drive.arcadeDrive(1.0, 1.0)
+        #else:
+        #    self.drive.arcadeDrive(0, 0)
+        ''''''
 
     def teleopPeriodic(self):
         """Called when operation control mode is enabled"""
+        ''' #TEST THIS LATER (MOVEMENT ADJUSTMENTS)
         #drive motors
         RightY = self.joystick.getRightY()
         LeftY = self.joystick.getLeftY()
 
-        # test code for changing how movement works:
-
-        # # exponential movement
-        # if(RightY < 0):
-        #     RightY = (RightY**4)*-1
-        # else:
-        #     RightY = (RightY**4)
+        #exponential movement
+        if(RightY < 0):
+            RightY = (RightY**4)*-1
+        else:
+            RightY = (RightY**4)
         
-        # if(LeftY < 0):
-        #     LeftY = (LeftY**4)*-1
-        # else:
-        #     LeftY = (LeftY**4)
+        if(LeftY < 0):
+            LeftY = (LeftY**4)*-1
+        else:
+            LeftY = (LeftY**4)
 
-        # # this makes it turn slower
-        # if((RightY < 0.1 and RightY > -0.1) and (LeftY > 0.5 or LeftY < -0.5)):
-        #     LeftY = LeftY * 0.66
-        # elif((LeftY < 0.1 and LeftY > -0.1) and (RightY > 0.5 or RightY < -0.5)):
-        #     RightY = RightY * 0.66
-
-
+        #this makes it turn slower
+        if((RightY < 0.1 and RightY > -0.1) and (LeftY > 0.5 or LeftY < -0.5)):
+            LeftY = LeftY * 0.66
+        elif((LeftY < 0.1 and LeftY > -0.1) and (RightY > 0.5 or RightY < -0.5)):
+            RightY = RightY * 0.66
+        
         self.drive.tankDrive(RightY, LeftY)
+        '''
 
         # LAUNCHER WHEEL CONTROL
         # Spins up the launcher wheel
@@ -146,7 +150,7 @@ class MyRobot(wpilib.TimedRobot):
         else:
             self.claw_motor.set(0)
 
-        # HOOK MOTOR CONTROL
+        # CLIMBER MOTOR CONTROL
         # POV is D-Pad on controller, 0 == UP   180 == DOWN
         if (self.joystick.getPOV() == 0):
             self.climber_motor.set(1)
@@ -154,3 +158,14 @@ class MyRobot(wpilib.TimedRobot):
             self.climber_motor.set(-1)
         else:
             self.climber_motor.set(0)
+
+    def disabledInit(self) -> None:
+        # This just makes sure that our simulation code knows that the motor is off
+        self.lf_motor.set(0)
+        self.lr_motor.set(0)
+        self.rf_motor.set(0)
+        self.rr_motor.set(0)
+        self.climber_motor.set(0)
+        self.claw_motor.set(0)
+        self.feed_motor.set(0)
+        self.launch_motor.set(0)
