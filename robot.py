@@ -8,6 +8,7 @@
 import rev
 import wpilib
 import wpilib.drive
+import time
 
 kY = 4 #Y Button
 kX = 3 #X Button
@@ -39,7 +40,7 @@ class MyRobot(wpilib.TimedRobot):
         self.drive = wpilib.drive.DifferentialDrive(l_motor, r_motor)
 
         self.climber_motor = rev.CANSparkMax(7, rev.CANSparkLowLevel.MotorType.kBrushless)
-        self.claw_motor = rev.CANSparkMax(8, rev.CANSparkLowLevel.MotorType.kBrushless)
+        self.claw_motor = rev.CANSparkMax(8, rev.CANSparkLowLevel.MotorType.kBrushed)
         self.feed_motor = rev.CANSparkMax(5, rev.CANSparkLowLevel.MotorType.kBrushed) #bottom wheel
         self.launch_motor = rev.CANSparkMax(6, rev.CANSparkLowLevel.MotorType.kBrushed) #top wheel
 
@@ -59,8 +60,10 @@ class MyRobot(wpilib.TimedRobot):
         self.climber_motor.setSmartCurrentLimit(60)
 
         # Brake mode best for these motors and their use
-        self.claw_motor.setIdleMode(1)      # kBrake
-        self.climber_motor.setIdleMode(1)   # kBrake
+        self.claw_motor.setIdleMode(rev.CANSparkBase.IdleMode.kBrake)
+                                                                                                       
+                                     # kBrake
+        self.climber_motor.setIdleMode(rev.CANSparkBase.IdleMode.kBrake)   # kBrake
 
         # Position gets automatically updated as robot moves
         self.gyro = wpilib.AnalogGyro(1)
@@ -77,15 +80,16 @@ class MyRobot(wpilib.TimedRobot):
         #if self.timer.get() < 1.0:
         #    self.drive.arcadeDrive(1.0, 1.0)
         #else:
-        #    self.drive.arcadeDrive(0, 0)
-        ''''''
+         #    self.drive.arcadeDrive(0, 0)
+        
 
     def teleopPeriodic(self):
         """Called when operation control mode is enabled"""
-        ''' #TEST THIS LATER (MOVEMENT ADJUSTMENTS)
+         #TEST THIS LATER (MOVEMENT ADJUSTMENTS)
         #drive motors
         RightY = self.joystick.getRightY()
         LeftY = self.joystick.getLeftY()
+        # print(f"RightY: {RightY} - LeftY: {LeftY}")
 
         #exponential movement
         if(RightY < 0):
@@ -97,16 +101,18 @@ class MyRobot(wpilib.TimedRobot):
             LeftY = (LeftY**4)*-1
         else:
             LeftY = (LeftY**4)
-
+        RightY = RightY *.5        
+        LeftY = LeftY *.5        
         #this makes it turn slower
-        if((RightY < 0.1 and RightY > -0.1) and (LeftY > 0.5 or LeftY < -0.5)):
+        if((RightY < 0.1 and RightY > -0.1) and (LeftY >= 0.5 or LeftY <= -0.5)):
             LeftY = LeftY * 0.66
-        elif((LeftY < 0.1 and LeftY > -0.1) and (RightY > 0.5 or RightY < -0.5)):
+        elif((LeftY < 0.1 and LeftY > -0.1) and (RightY >= 0.5 or RightY <=-0.5)):
             RightY = RightY * 0.66
-        
-        self.drive.tankDrive(RightY, LeftY)
-        '''
+        print(f"RightY: {RightY} - LeftY: {LeftY}")
 
+        self.drive.tankDrive(RightY, LeftY)
+        
+        '''
         # LAUNCHER WHEEL CONTROL
         # Spins up the launcher wheel
         if (self.joystick.getRawButton(kRB)):
@@ -120,13 +126,24 @@ class MyRobot(wpilib.TimedRobot):
             self.feed_motor.set(1)
         elif (self.joystick.getRawButtonReleased(kLB)):
             self.feed_motor.set(0)
-
+        '''
         # INTAKE NOTE
         # While the button is being held spin both motors to intake note
         if (self.joystick.getRawButton(kY)):
             self.launch_motor.set(-1)
-            self.feed_motor.set(1)
+            self.feed_motor.set(-1)
         elif (self.joystick.getRawButtonReleased(kY)):
+            self.launch_motor.set(0)
+            self.feed_motor.set(0)
+        
+        # LAUNCH NOTE
+        # Spin the launcher motor for a second, then feed the note with feeder wheel
+        if (self.joystick.getRawButton(kRB)):
+            start = time.time()
+            while (time.time() < start + 1):
+                self.launch_motor.set(1)
+            self.feed_motor.set(1)
+        elif (self.joystick.getRawButtonReleased(kRB)):
             self.launch_motor.set(0)
             self.feed_motor.set(0)
 
